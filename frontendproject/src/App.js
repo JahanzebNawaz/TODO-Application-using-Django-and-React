@@ -1,22 +1,6 @@
 import React, { Component } from 'react';
 import Modal from './components/Modal';
-
-
-// add const variable to add demo data
-const TodoItems = [
-  {
-    id: 1,
-    title: "Demo Title One",
-    description: "Welcome to Django React First Demo Description",
-    completed: true,
-  },
-  {
-    id: 2,
-    title: "Demo Title Two",
-    description: "Welcome to Django React Two Demo Description",
-    completed: false,
-  }
-];
+import axios from "axios";
 
 
 class App extends Component {
@@ -30,30 +14,23 @@ class App extends Component {
         description: "",
         completed: false,
       },
-      todoList: TodoItems,
+      todoList: [],
     };
   }
 
-  toggle = () => {
-        this.setState({ modal: !this.state.modal });
-      };
+  componentDidMount(){
+    this.refreshList();
+  }
+  // to refresh list everytime request is send to server to get data into ItemList
+  refreshList = () => {
+    axios
+        .get("/todos/")
+        .then(res => this.setState({ todoList: res.data}))
+        .catch(err => console.log(err))
+  }
 
-  handleSubmit = item => {
-    this.toggle();
-    alert("save" + JSON.stringify(item));
-  };
-  handleDelete = item => {
-    alert("delete" + JSON.stringify(item));
-  };
-  createItem = () => {
-    const item = { title: "", description: "", completed: false };
-    this.setState({ activeItem: item, modal: !this.state.modal });
-  };
-  editItem = item => {
-    this.setState({ activeItem: item, modal: !this.state.modal });
-  };
-
-    // changing state of viewCompleted 
+  // after getiing data from server displayed into renderTablist and renderItems method
+  // changing state of viewCompleted 
   displayCompleted = status => {
     if(status){
       return this.setState({ viewCompleted: true});
@@ -61,6 +38,44 @@ class App extends Component {
     else{
       return this.setState({ viewCompleted: false });
     }
+  };
+
+
+  toggle = () => {
+    this.setState({ modal: !this.state.modal });
+  };
+
+  // handling the submit function
+  // function takes care of both the create and update operations
+  handleSubmit = item => {
+    this.toggle();
+    if(item.id){
+      axios
+        .put(`/todos/${item.id}/`, item)
+        .then(res => this.refreshList());
+      return;
+    }
+    else {
+      axios
+      .post("/todos/", item)
+      .then(res => this.refreshList());
+    }
+  };
+
+  // handling delete function
+  handleDelete = (item) => {
+    axios
+        .delete(`/todos/${item.id}`)
+        .then(res => this.refreshList());
+  };
+
+  // create Item
+  createItem = () => {
+    const item = { title: "", description: "", completed: false };
+    this.setState({ activeItem: item, modal: !this.state.modal });
+  };
+  editItem = item => {
+    this.setState({ activeItem: item, modal: !this.state.modal });
   };
 
   renderTabList = () => {
@@ -81,14 +96,17 @@ class App extends Component {
 
     return newItems.map(item => (     
       <li key={item.id} className="list-group-item d-flex justify-content-between align-items-center">
-        <span className={'todo-title mr-2 ${this.state.viewCompleted ? "completed-todo" : ""} '} title={item.description}> {item.title} </span>
+        <span className={`todo-title mr-2  `} title={item.description}> {item.title} </span>
         <span>
-          <button onClick={() => this.editItem(item)} className="btn btn-secondary mr-2" > Edit </button>
-          <button onClick={() => this.handleDelete(item)} className="btn btn-danger"> Delete </button>
+          <button onClick={() => this.editItem(item)} className="btn btn-secondary mr-2" > {" "}Edit{" "}</button>
+          <button  onClick={() => this.handleDelete(item)} className="btn btn-danger"> Delete{" "} </button>
         </span>
       </li>
     ));
   };
+
+  // getting data from server finished
+
 
   render () {
     return (

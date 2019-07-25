@@ -1,0 +1,80 @@
+
+Everything will be done in Virtual Env .
+
+1- Make Django Project
+	- django-admin startproject ProjectName
+2- Make Django App
+	- python3 startapp AppName in Setting.py file
+3- add name of app in INSTALLED_APPS
+4- Make Model in Model.py file 
+	-Model file is used to create model such as database tabels and fields 
+
+5- Make Migrations in Terminal
+	- python3 manage.py makemigrations
+	- python3 manage.py migrate
+
+6- register you App in admin.py file  to be able to use it 
+
+
+Setting Up API
+
+1- add corsheader and rest-framework in INSTALLED_APP in Setting.py file
+		INSTALLED_APPS = [
+			corsheader
+			rest_framework ]
+		
+		MIDDLEWARE = [
+			'corsheaders.middleware.CorsMiddleware', ]
+		
+	at the end of Setting.py file add . to enable data transfromation between react and django
+		CORS_ORIGIN_WHITELIST = [	
+			'localhost:3000' ]
+
+2- Create Serializers.py file in App
+	- model = Modelname
+	- fields = ('a', 'b') #demo fileds added
+
+3- Create View in Views.py file
+	- class
+		serializers_class = NameSerializer from serializers class
+		queryset = ModelName.objects.all()
+
+4- Urls.py
+	from rest framework import routers
+	router = routers.DefaultRouter()                      # add this
+	router.register(r'todos', views.TodoView, 'todo')     # add this
+
+	urlpatterns= [
+		set it   include('router.urls') ]
+
+
+
+Setting up FRont END
+
+1- npx create-react-app AppName
+
+2- Create layout as per need
+
+3- add proxy in package.json file
+	'proxy': 'http://localhost:8000',  # proxy to user Django app links /Appname/links
+
+
+4- import axios in react
+	componentDidMount() {
+        this.refreshList();
+      }
+      refreshList = () => {
+        axios
+          .get("http://localhost:8000/api/todos/")
+          .then(res => this.setState({ todoList: res.data }))
+          .catch(err => console.log(err));
+      };
+
+
+
+Completed
+
+
+
+
+
